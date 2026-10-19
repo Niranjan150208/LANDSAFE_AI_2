@@ -37,7 +37,7 @@ function normalizeFactor(key, value) {
   // These are illustrative prototype thresholds, not an official landslide forecast model.
   const anchors = {
     rain24: [[0,0],[2,3],[4.2,4.86],[118.5,81.8],[150,100]],
-    rain72: [[0,0],[5,4],[18,7.2],[215,86],[250,100]],
+    rain72: [[0,0],[5,2],[18,7.2],[215,86],[250,100]],
     soilMoisture: [[0,0],[18,10],[21,17],[44,82.9],[55,100]],
     slope: [[0,0],[20,10],[22,20],[42,77.1],[55,100]],
     pga: [[0,0],[0.008,0],[0.11,52.6],[0.2,100]]
