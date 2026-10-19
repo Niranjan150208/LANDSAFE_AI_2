@@ -2,13 +2,14 @@
   "name": "landsafe-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "Disaster risk monitoring demo for North East India",
-  "main": "server.js",
+  "type": "module",
+  "description": "LANDSAFE AI disaster-risk monitoring and offline incident reporting demo",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
-  },
-  "engines": {
-    "node": ">=22"
+    "test": "node --test",
+    "test:risk": "node --test tests/*.test.js"
   }
 }
