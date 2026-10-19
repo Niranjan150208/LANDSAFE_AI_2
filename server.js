@@ -1,7 +1,7 @@
 import http from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { randomUUID } from "node:crypto";
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -210,12 +210,18 @@ async function handle(req,res) {
     res.end(data);
   } catch { json(res,404,{error:"File not found"}); }
 }
-await loadState();
-const server = http.createServer((req,res) => {
-  handle(req,res).catch(err => {
-    if (!res.headersSent) json(res,err.status||500,{error:err.status ? err.message : "Internal server error"});
-    else res.end();
-    if (!err.status) console.error(err);
+export async function startServer() {
+  await loadState();
+  const server = http.createServer((req,res) => {
+    handle(req,res).catch(err => {
+      if (!res.headersSent) json(res,err.status||500,{error:err.status ? err.message : "Internal server error"});
+      else res.end();
+      if (!err.status) console.error(err);
+    });
   });
-});
-server.listen(PORT,"0.0.0.0",() => console.log(`LANDSAFE AI listening on port ${PORT}`));
+  server.listen(PORT,"0.0.0.0",() => console.log(`LANDSAFE AI listening on port ${PORT}`));
+  return server;
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  startServer();
+}
