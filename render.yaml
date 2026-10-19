@@ -11,7 +11,5 @@ services:
         value: 22.13.0
       - key: NODE_ENV
         value: production
-    disk:
-      name: landsafe-data
-      mountPath: /var/data
-      sizeGB: 1
+      - key: DATA_DIR
+        value: /tmp/landsafe-data
