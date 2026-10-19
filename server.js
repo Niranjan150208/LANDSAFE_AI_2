@@ -76,7 +76,9 @@ export function evaluateRisk(input = {}) {
       contributions[f.key] = Number((normalized[f.key] * WEIGHTS[f.key] / activeWeight).toFixed(2));
     }
   }
-  const ageHours = finiteOrNull(input.observationAgeHours) ?? 0;
+  const suppliedAge = finiteOrNull(input.observationAgeHours);
+  if (suppliedAge !== null && suppliedAge < 0) throw new Error("observationAgeHours must be zero or greater.");
+  const ageHours = suppliedAge ?? 0;
   const stalePenalty = ageHours > 24 ? 5 : 0;
   const weighted = active.reduce((sum, f) => sum + normalized[f.key] * WEIGHTS[f.key] / activeWeight, 0);
   const score = clamp(Math.round(weighted + stalePenalty));
@@ -84,7 +86,7 @@ export function evaluateRisk(input = {}) {
   return {
     score, ...classification, values, normalizedFactors:normalized, contributions,
     weights:WEIGHTS, missingFactors, observationAgeHours:ageHours,
-    dataStatus: input.simulated ? "SIMULATED" : (ageHours > 24 ? "STALE" : "LIVE"),
+    dataStatus: input.simulated ? "SIMULATED" : (ageHours > 24 ? "STALE" : "UNVERIFIED_INPUT"),
     stalePenalty, uncertaintyNote: missingFactors.length ? "Missing factors are excluded and active weights are renormalized; confirm with field observations." : null,
     evaluatedAt:new Date().toISOString()
   };
@@ -146,7 +148,7 @@ async function handle(req,res) {
   if (req.method === "OPTIONS") { res.writeHead(204, {"Access-Control-Allow-Methods":"GET,POST,OPTIONS","Access-Control-Allow-Headers":"Content-Type"}); return res.end(); }
   if (url.pathname.startsWith("/api/")) {
     if (req.method === "GET" && url.pathname === "/api/health") {
-      return json(res,200,{status:"ONLINE",service:"LANDSAFE AI Operational Decision Hub",uptimeSeconds:Math.floor(process.uptime()),timestamp:new Date().toISOString(),activeMonitoredSectors:4,upstreamProvider:"SIMULATED / prototype data",storage:"JSON file persistence",mode:"DEMO"});
+      return json(res,200,{status:"ONLINE",service:"LANDSAFE AI Operational Decision Hub",uptimeSeconds:Math.floor(process.uptime()),timestamp:new Date().toISOString(),activeMonitoredSectors:4,upstreamProvider:"SIMULATED / prototype data",storage:"JSON file persistence (ephemeral unless DATA_DIR is persistent)",mode:"DEMO",riskModel:"ILLUSTRATIVE_NOT_VALIDATED"});
     }
     if (req.method === "GET" && url.pathname === "/api/risk/model") {
       return json(res,200,{weights:WEIGHTS,factors:FACTORS,thresholds:{SAFE:"0–29",WATCH:"30–49",HIGH:"50–74",EVACUATE:"75–100"},calibration:"Illustrative demo anchors; not an official operational forecast model."});
