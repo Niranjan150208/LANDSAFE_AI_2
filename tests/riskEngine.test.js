@@ -4,7 +4,7 @@ import { evaluateRisk } from "../server.js";
 
 test("low precipitation and dry conditions remain low risk", () => {
   const r = evaluateRisk({rain24:2,rain72:5,soilMoisture:18,slope:20,pga:0.005,simulated:true});
-  assert.ok(r.score >= 0 && r.score <= 15);
+  assert.equal(r.score,5);
   assert.equal(r.dataStatus,"SIMULATED");
   assert.equal(r.missingFactors.length,0);
 });
@@ -35,4 +35,10 @@ test("evaluation is deterministic for identical inputs", () => {
 test("invalid values and empty telemetry are rejected", () => {
   assert.throws(() => evaluateRisk({rain24:-1}),/Out-of-range/);
   assert.throws(() => evaluateRisk({}),/At least one sensor factor/);
+});
+
+test("normal-condition demo scenario matches the documented safe score", () => {
+  const r = evaluateRisk({rain24:4.2,rain72:18,soilMoisture:21,slope:22,pga:0.008,simulated:true});
+  assert.equal(r.score,10);
+  assert.equal(r.category,"SAFE");
 });
