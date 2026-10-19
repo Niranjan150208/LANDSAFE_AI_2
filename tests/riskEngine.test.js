@@ -42,3 +42,18 @@ test("normal-condition demo scenario matches the documented safe score", () => {
   assert.equal(r.score,10);
   assert.equal(r.category,"SAFE");
 });
+
+test("unverified caller-supplied measurements are never labelled live telemetry", () => {
+  const r = evaluateRisk({rain24:20,rain72:35,soilMoisture:25,slope:28,pga:0.01});
+  assert.equal(r.dataStatus,"UNVERIFIED_INPUT");
+});
+
+test("negative observation age is rejected", () => {
+  assert.throws(() => evaluateRisk({rain24:20,observationAgeHours:-1}),/observationAgeHours/);
+});
+
+test("out-of-range values are rejected for every factor", () => {
+  for (const [key,value] of [["rain24",301],["rain72",501],["soilMoisture",111],["slope",111],["pga",0.401]]) {
+    assert.throws(() => evaluateRisk({[key]:value}),/Out-of-range/);
+  }
+});
